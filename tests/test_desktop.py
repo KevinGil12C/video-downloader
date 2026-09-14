@@ -9,10 +9,12 @@ import socket
 import threading
 import time
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 import eel
 import pytest
+import uvicorn
 
 from app.backend.config import APP_VERSION
 from app.desktop.main import (
@@ -68,6 +70,17 @@ def test_browser_mode_defaults_to_edge() -> None:
     assert _browser_mode() == "edge"
 
 
+def test_browser_mode_false_values(monkeypatch: pytest.MonkeyPatch) -> None:
+    for raw in ("false", "0", "none", "FALSE"):
+        monkeypatch.setenv("VD_BROWSER", raw)
+        assert _browser_mode() is False
+
+
+def test_browser_mode_custom_value(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VD_BROWSER", "chrome")
+    assert _browser_mode() == "chrome"
+
+
 def test_uvicorn_thread_starts_and_stops() -> None:
     port = _free_port()
     api = UvicornThread(host="127.0.0.1", port=port)
@@ -121,3 +134,54 @@ def test_main_boots_api_and_closes_window(monkeypatch: pytest.MonkeyPatch) -> No
 
     assert result["code"] == 0
     _wait_down(port)
+
+
+def test_uvicorn_thread_raises_when_server_never_starts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import app.desktop.main as desktop
+
+    class NeverServer:
+        started = False
+        should_exit = False
+
+        def __init__(self, config: Any) -> None:
+            pass
+
+        def run(self) -> None:
+            return None
+
+    monkeypatch.setattr(uvicorn, "Server", NeverServer)
+    monkeypatch.setattr(desktop.time, "sleep", lambda _seconds: None)
+
+    counter = iter([1.0, 100.0])
+    monkeypatch.setattr(desktop.time, "monotonic", lambda: next(counter))
+
+    api = desktop.UvicornThread(host="127.0.0.1", port=_free_port())
+    with pytest.raises(RuntimeError, match="failed to start"):
+        api.start()
+    api.stop()
+
+
+def test_main_returns_error_when_web_dir_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import app.desktop.main as desktop
+
+    calls: list[str] = []
+
+    class NoopThread:
+        def __init__(self, host: str, port: int) -> None:
+            pass
+
+        def start(self) -> None:
+            calls.append("start")
+
+        def stop(self) -> None:
+            calls.append("stop")
+
+    monkeypatch.setattr(desktop, "UvicornThread", NoopThread)
+    monkeypatch.setattr(desktop, "WEB_DIR", Path("/does/not/exist"))
+
+    assert desktop.main() == 1
+    assert calls == ["start", "stop"]

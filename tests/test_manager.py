@@ -45,15 +45,21 @@ class FakeDL:
     """Minimal yt-dlp stand-in that invokes progress hooks synchronously."""
 
     def __init__(
-        self, info: dict | None = None, error: Exception | None = None
+        self,
+        info: dict | None = None,
+        error: Exception | None = None,
+        hook_payload: dict | None = None,
     ) -> None:
         self.options: dict = {}
         self.info = info
         self.error = error
+        self.hook_payload = (
+            hook_payload if hook_payload is not None else {"_percent_str": "0.0%"}
+        )
 
     def extract_info(self, url: str, download: bool = False) -> dict:
         for hook in self.options.get("progress_hooks", []):
-            hook({"_percent_str": "0.0%"})
+            hook(self.hook_payload)
         if self.error is not None:
             raise self.error
         return self.info or {"id": "x1", "title": "T", "ext": "mp4"}
@@ -309,3 +315,72 @@ def test_max_concurrent_limits_parallel_runs(tmp_path: Path) -> None:
         assert all(manager.get(record.id).status == "completed" for record in records)
 
     asyncio.run(run())
+
+
+def test_cancelling_twice_is_idempotent(tmp_path: Path) -> None:
+    manager = DownloadManager(downloads_dir=tmp_path, dl_builder=make_fake(FakeDL()))
+
+    async def run() -> None:
+        record = await manager.create(SAFE_URL)
+        manager.cancel(record.id)
+        again = manager.cancel(record.id)
+        assert again.status == "cancelled"
+
+    asyncio.run(run())
+
+
+def test_unexpected_download_exception_is_captured(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import app.services.manager as manager_module
+
+    class ExplodingService:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def download(self, *args, **kwargs) -> Path:
+            raise RuntimeError("unexpected failure")
+
+    monkeypatch.setattr(manager_module, "DownloadService", ExplodingService)
+    manager = DownloadManager(downloads_dir=tmp_path, dl_builder=make_fake(FakeDL()))
+
+    async def run() -> None:
+        record = await manager.create(SAFE_URL)
+        await manager.wait_all()
+        final = manager.get(record.id)
+        assert final is not None
+        assert final.status == "error"
+        assert "unexpected failure" in (final.error_message or "")
+
+    asyncio.run(run())
+
+
+def test_malformed_progress_payload_is_ignored(tmp_path: Path) -> None:
+    out_file = tmp_path / "T.mp4"
+    out_file.write_bytes(b"data")
+    manager = DownloadManager(
+        downloads_dir=tmp_path,
+        dl_builder=make_fake(FakeDL(info=completed_info(out_file), hook_payload={})),
+    )
+
+    async def run() -> None:
+        record = await manager.create(SAFE_URL)
+        await manager.wait_all()
+        final = manager.get(record.id)
+        assert final is not None
+        assert final.status == "completed"
+
+    asyncio.run(run())
+
+
+def test_format_speed_petabytes_overflow() -> None:
+    from app.services.manager import _format_speed
+
+    assert _format_speed(None, 1024**6) == "1024.0 PiB/s"
+    assert _format_speed(None, 2048) == "2.0 KiB/s"
+
+
+def test_wait_for_tasks_returns_without_tasks() -> None:
+    from app.services.manager import wait_for_tasks
+
+    asyncio.run(wait_for_tasks())

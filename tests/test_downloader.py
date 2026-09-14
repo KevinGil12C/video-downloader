@@ -201,3 +201,41 @@ def test_service_receives_injectable_builder() -> None:
 
     assert len(builder_calls) == 1
     assert builder_calls[0]["simulate"] is True
+
+
+def test_ffmpeg_location_is_passed_to_ytdlp_options() -> None:
+    dl = FakeDL()
+    service = DownloadService(
+        downloads_dir=Path("downloads"),
+        dl_builder=lambda options: dl.__dict__.update(options=options) or dl,
+        ffmpeg_location=r"C:\tools\ffmpeg\bin",
+    )
+
+    service.extract_metadata(SAFE_URL)
+
+    assert dl.options["ffmpeg_location"] == r"C:\tools\ffmpeg\bin"
+
+
+def test_extract_metadata_raises_when_info_is_empty() -> None:
+    service = make_service(FakeDL(info={}))
+
+    with pytest.raises(ExtractionError):
+        service.extract_metadata(SAFE_URL)
+
+
+def test_download_falls_back_to_prepare_filename(tmp_path: Path) -> None:
+    out_file = tmp_path / "Infer.mp4"
+    out_file.write_bytes(b"data")
+
+    class LocalFileDL(FakeDL):
+        def prepare_filename(self, info: dict) -> str:
+            return str(out_file)
+
+    service = make_service(
+        LocalFileDL(info={"id": "i1", "title": "Infer", "ext": "mp4"}),
+        downloads_dir=tmp_path,
+    )
+
+    result = service.download(SAFE_URL)
+
+    assert result == out_file

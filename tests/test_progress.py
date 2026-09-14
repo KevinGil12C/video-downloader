@@ -152,3 +152,24 @@ def test_set_update_listener_replaces_listener(tmp_path: Path) -> None:
     )
     manager.set_update_listener(lambda record: None)
     assert manager._on_update is not None  # noqa: SLF001
+
+
+def test_safe_send_disconnects_when_send_fails() -> None:
+    from app.services.progress import ProgressHub
+
+    class FailingSocket:
+        async def send_json(self, payload: dict) -> None:
+            raise RuntimeError("connection lost")
+
+    manager = DownloadManager(dl_builder=make_fake(ProgressDL()))
+    hub = ProgressHub(manager)
+    socket = FailingSocket()
+    record = DownloadRecord(id="xyz", url=SAFE_URL, kind="video", quality="best")
+    hub._sockets.add(socket)  # noqa: SLF001
+
+    async def run() -> None:
+        await hub._safe_send(socket, progress_event(record))  # noqa: SLF001
+
+    asyncio.run(run())
+
+    assert socket not in hub._sockets  # noqa: SLF001

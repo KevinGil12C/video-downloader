@@ -33,12 +33,12 @@ if not exist "%ROOT_DIR%tests\test_*.py" (
     exit /b 0
 )
 
-REM --- Run pytest ---
+REM --- Run pytest with coverage gate ---
 echo.
 echo ---------------------------------------------------
-echo   Running pytest
+echo   Running pytest (coverage %= 95)
 echo ---------------------------------------------------
-"%PY%" -m pytest -v --tb=short
+"%PY%" -m pytest --cov=app --cov-report=term-missing --cov-fail-under=95 -v --tb=short
 set "PYTEST_EXIT=%errorlevel%"
 
 REM --- Lint (non-blocking) ---

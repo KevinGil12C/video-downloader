@@ -54,6 +54,16 @@ addopts = "-ra --strict-markers"
 python_files = "test_*.py"
 pythonpath = ["."]
 
+[tool.coverage.run]
+source = ["app"]
+exclude_lines = ["if TYPE_CHECKING:", "if __name__ == '__main__':"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["if TYPE_CHECKING:", "if __name__ == '__main__':"]
+skip_empty = true
+fail_under = 95
+
 [tool.mypy]
 python_version = "3.10"
 strict = true
