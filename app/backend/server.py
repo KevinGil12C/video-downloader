@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.backend.api import downloads, health, info, ws
 from app.backend.config import APP_VERSION, PROJECT_ROOT, get_settings
-from app.backend.security import allowed_cors_origins
+from app.backend.security import RejectDisallowedOrigin, allowed_cors_origins
 
 
 def create_app() -> FastAPI:
@@ -34,8 +34,12 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=allowed_cors_origins(),
         allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type"],
+    )
+    application.add_middleware(
+        RejectDisallowedOrigin,
+        allowed_origins=allowed_cors_origins(),
     )
 
     application.include_router(health.router)

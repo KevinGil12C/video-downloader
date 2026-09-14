@@ -67,5 +67,5 @@ def test_extension_origins_do_not_bypass_cors() -> None:
             "Access-Control-Request-Method": "POST",
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 403
     assert "access-control-allow-origin" not in response.headers

@@ -11,10 +11,43 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
+from starlette.datastructures import Headers
+from starlette.responses import PlainTextResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
+
 from app.backend.config import get_settings
 
 _ALLOWED_URL_SCHEMES = {"http", "https"}
 _MAX_URL_LENGTH = 2048
+
+
+class RejectDisallowedOrigin:
+    """Reject HTTP requests carrying a non-allowlisted ``Origin`` header.
+
+    Browsers attach ``Origin`` to cross-origin requests (and to same-origin
+    ones when they are not simple GETs). Short-circuiting every request whose
+    origin is not in the CORS allowlist stops even non-preflighted requests
+    (for example navigations from an attacker page) from reaching the
+    routers, hardening the local API against DNS-rebinding style attacks.
+
+    WebSocket connections are left to the browser's own cross-origin rules:
+    extension builtins may originate from a ``chrome-extension://`` origin.
+    """
+
+    def __init__(self, app: ASGIApp, allowed_origins: list[str]) -> None:
+        self.app = app
+        self.allowed = set(allowed_origins)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        origin = Headers(scope=scope).get("origin")
+        if origin is not None and origin not in self.allowed:
+            response = PlainTextResponse("Forbidden", status_code=403)
+            await response(scope, receive, send)
+            return
+        await self.app(scope, receive, send)
 
 
 def allowed_cors_origins() -> list[str]:

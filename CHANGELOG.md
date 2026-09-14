@@ -35,5 +35,9 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Tests de la extensión: manifest MV3 válido, permisos y hosts locales, archivos referenciados presentes, endpoints coherentes con el backend y verificación de que un origen `chrome-extension://` no elude CORS (`tests/test_extension.py`).
 
 ### Changed
+- Endurecimiento CORS: el middleware solo admite `GET/POST/DELETE/OPTIONS` con cabecera `Content-Type` y sin credenciales (`allow_credentials=False`).
+- Nuevo `RejectDisallowedOrigin` (middleware más externo): toda petición HTTP con `Origin` no autorizada (incluido `Origin: null`) responde `403` antes de llegar a los routers, mitigando ataques tipo DNS rebinding; el WebSocket queda gobernado por las reglas de origen del navegador.
+- `config.validate_host` rechaza `VD_HOST` que no sea loopback (`127.0.0.1`, `localhost`, `::1`): la API nunca se bindea a interfaces externas (`0.0.0.0`/`::`).
+- Tests de CORS y binding: origen permitido reflejado, origen Eel, orígenes desautorizados (`403`), `Origin: null`, sin `Origin`, preflight permitido/denegado, sin credenciales, WS no bloqueado, extra de entorno y validación de host (`tests/test_cors.py`).
 ### Fixed
 ### Security

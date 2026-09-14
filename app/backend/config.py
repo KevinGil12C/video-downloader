@@ -29,10 +29,26 @@ APP_VERSION = "0.1.0"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
 
+LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
+
 DEFAULT_ALLOWED_ORIGINS = (
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 )
+
+
+def validate_host(host: str) -> None:
+    """Refuse to bind the API to non-loopback interfaces.
+
+    The whole security model relies on the API being reachable only from
+    the local machine, so ``0.0.0.0``, ``::`` or a network address are not
+    accepted.
+    """
+    if host not in LOOPBACK_HOSTS:
+        raise ValueError(
+            "VD_HOST must be a loopback address (127.0.0.1, localhost or ::1); "
+            f"got {host!r}. The API never binds to external interfaces."
+        )
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -80,8 +96,11 @@ def load_settings() -> Settings:
             origin.strip() for origin in raw.split(",") if origin.strip()
         )
 
+    host = os.getenv("VD_HOST", DEFAULT_HOST).strip()
+    validate_host(host)
+
     return Settings(
-        host=os.getenv("VD_HOST", DEFAULT_HOST),
+        host=host,
         port=_env_int("VD_PORT", DEFAULT_PORT),
         downloads_dir=downloads_dir,
         logs_dir=logs_dir,

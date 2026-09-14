@@ -15,7 +15,7 @@ Documento técnico sobre las decisiones de seguridad de **Video Downloader Local
 
 ## Red
 
-- FastAPI se ejecuta en `127.0.0.1` (loopleback) — nunca en `0.0.0.0`.
+- FastAPI se ejecuta en `127.0.0.1` (loopback) — nunca en `0.0.0.0`. La configuración rechaza cualquier `VD_HOST` que no sea una dirección de loopback (`127.0.0.1`, `localhost`, `::1`).
 - Puerto configurable por entorno (`VD_PORT`, por defecto `8000`).
 - El modo Desktop (Eel) usa el mismo backend local; no abre servidores adicionales.
 
@@ -26,7 +26,13 @@ La aplicación define una **allowlist de orígenes**:
 - `http://localhost` y `http://127.0.0.1` en el puerto de la API y en el puerto de la ventana Eel (API + 1).
 - Orígenes extra explícitos vía `VD_ALLOWED_ORIGINS`.
 - La **extensión MV3 no necesita CORS**: sus peticiones con `host_permissions` hacia la API local no se rigen por CORS, por lo que sus orígenes `chrome-extension://...` **no** se añaden a la allowlist.
-- Cualquier petición con `Origin` no autorizada es rechazada por el navegador (reglas CORS).
+
+Comportamiento aplicado en dos capas:
+
+1. `RejectDisallowedOrigin`: cualquier petición HTTP con cabecera `Origin` **no** autorizada (incluido `Origin: null`) responde `403` antes de llegar a los routers, aunque no haya preflight (mitiga DNS rebinding).
+2. `CORSMiddleware`: solo autoriza `GET/POST/DELETE/OPTIONS` con cabecera `Content-Type`, sin credenciales (`allow_credentials=False`), y refleja el origen solo si está en la allowlist.
+
+Las peticiones **sin** cabecera `Origin` (curl, extensión, mismo origen) se sirven normalmente. El WebSocket queda gobernado por las reglas de origen del propio navegador (la extensión conecta desde su contexto).
 
 La implementación valida la cabecera `Origin` en el middleware y **no** usa `allow_origin_regex=".*"`.
 

@@ -179,4 +179,9 @@ La API restringe CORS a:
 
 > La **extensión de navegador no aparece en la allowlist**: en Manifest V3, las peticiones con `host_permissions` hacia la API local no se rigen por CORS (ver [security.md](security.md)).
 
-Cualquier otro origen no autorizado recibirá el bloqueo CORS del navegador.
+Comportamiento real:
+
+- Métodos permitidos: `GET`, `POST`, `DELETE`, `OPTIONS`. Cabecera permitida: `Content-Type`. Sin credenciales.
+- Una petición con `Origin` (incluido `Origin: null`) que no esté en la allowlist responde `403` **antes** de llegar al endpoint.
+- Los preflight (`OPTIONS`) autorizados responden `200` con `Access-Control-Allow-Origin`, `-Methods` y `-Headers`.
+- Las peticiones sin cabecera `Origin` (curl, extensión MV3, mismo origen) se sirven normalmente.
