@@ -57,7 +57,8 @@ def format_selector(kind: str, quality: str) -> str:
     )
 
 
-def _validate(kind: str, quality: str) -> None:
+def validate_request(kind: str, quality: str) -> None:
+    """Reject unsupported kind/quality values before a download starts."""
     if kind not in ALLOWED_KINDS:
         raise InvalidRequestError(f"Unknown kind: {kind!r}")
     if quality not in ALLOWED_QUALITIES:
@@ -126,7 +127,7 @@ class DownloadService:
         """Download the media at ``url`` and return the output file path."""
         if not is_safe_url(url):
             raise UnsupportedURLError("URL rejected by security validation")
-        _validate(kind, quality)
+        validate_request(kind, quality)
 
         output_dir = Path(output_dir) if output_dir else self.downloads_dir
         output_dir.mkdir(parents=True, exist_ok=True)

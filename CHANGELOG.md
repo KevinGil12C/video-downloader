@@ -17,6 +17,9 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Ruff: sección isort con `app` como primer-party; pytest: `pythonpath = ["."]`.
 - Servicio FFmpeg (`app/services/ffmpeg.py`): búsqueda del binario (proyecto/PATH), verificación y reporte de versión; `/api/info` expone `ffmpeg_available` y `ffmpeg_version`.
 - Tests del servicio FFmpeg con `subprocess` simulado (`tests/test_ffmpeg.py`).
+- Servicio Download manager (`app/services/manager.py`): cola en memoria con `DownloadRecord`, descargas en segundo plano con límite de concurrencia, cancelación cooperativa y borrado de historial.
+- Endpoints de descargas en `app/backend/api/downloads.py`: `POST/GET /api/downloads`, `GET/DELETE /api/downloads/{id}` y `POST /api/downloads/{id}/cancel` (registrados en `create_app`).
+- Tests del manager (ciclo de vida, cancelación, concurrencia) y del contrato HTTP de descargas con el manager sustituido por un stub.
 
 ### Changed
 ### Fixed
