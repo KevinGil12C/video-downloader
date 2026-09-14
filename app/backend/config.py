@@ -23,6 +23,7 @@ from functools import lru_cache
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DOWNLOADS_DIR = Path.home() / "Downloads" / "Video Downloader"
 
 APP_VERSION = "0.1.0"
 
@@ -74,7 +75,7 @@ class Settings:
 
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
-    downloads_dir: Path = PROJECT_ROOT / "downloads"
+    downloads_dir: Path = DEFAULT_DOWNLOADS_DIR
     logs_dir: Path = PROJECT_ROOT / "logs"
     debug: bool = False
     allowed_origins: tuple[str, ...] = DEFAULT_ALLOWED_ORIGINS
@@ -87,7 +88,7 @@ class Settings:
 
 def load_settings() -> Settings:
     """Build a :class:`Settings` from environment variables."""
-    downloads_dir = Path(os.getenv("VD_DOWNLOADS_DIR", str(PROJECT_ROOT / "downloads")))
+    downloads_dir = Path(os.getenv("VD_DOWNLOADS_DIR", str(DEFAULT_DOWNLOADS_DIR))).expanduser()
     logs_dir = Path(os.getenv("VD_LOGS_DIR", str(PROJECT_ROOT / "logs")))
 
     allowed_origins = list(DEFAULT_ALLOWED_ORIGINS)

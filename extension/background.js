@@ -76,6 +76,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
               url: message.url,
               format,
               quality: message.quality || (format === "audio" ? "best" : settings.quality),
+              directory: message.directory,
             },
             settings.apiBase,
           );
@@ -95,6 +96,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
               url,
               format,
               quality: message.quality || (format === "audio" ? "best" : settings.quality),
+              directory: message.directory,
             },
             settings.apiBase,
           );

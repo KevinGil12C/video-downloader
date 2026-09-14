@@ -22,6 +22,7 @@ const el = {
   url: document.getElementById("url"),
   format: document.getElementById("format"),
   quality: document.getElementById("quality"),
+  directory: document.getElementById("directory"),
   download: document.getElementById("download"),
   formError: document.getElementById("form-error"),
   list: document.getElementById("list"),
@@ -117,8 +118,19 @@ async function onSubmit(event) {
   el.download.disabled = true;
   try {
     const result = explicit
-      ? await send({ type: "submit", url: explicit, format, quality })
-      : await send({ type: "capture", format, quality });
+      ? await send({
+          type: "submit",
+          url: explicit,
+          format,
+          quality,
+          directory: el.directory.value.trim() || undefined,
+        })
+      : await send({
+          type: "capture",
+          format,
+          quality,
+          directory: el.directory.value.trim() || undefined,
+        });
     if (!result || !result.ok) {
       showError(result && result.error ? result.error : "No respondió el backend local.");
       return;

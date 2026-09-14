@@ -23,7 +23,8 @@ def test_load_settings_defaults() -> None:
     assert settings.host == "127.0.0.1"
     assert settings.port == 8000
     assert settings.debug is False
-    assert settings.downloads_dir.name == "downloads"
+    assert settings.downloads_dir.name == "Video Downloader"
+    assert settings.downloads_dir.parent.name == "Downloads"
 
 
 def test_invalid_port_falls_back_to_default() -> None:

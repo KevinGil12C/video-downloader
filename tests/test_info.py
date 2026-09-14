@@ -39,7 +39,7 @@ def test_info_reports_full_environment(
     assert body["ffmpeg_available"] is True
     assert body["ffmpeg_version"] == FAKE_VERSION
     assert isinstance(body["platform"], str)
-    assert body["downloads_dir"].endswith("downloads")
+    assert body["downloads_dir"].endswith("Downloads\\Video Downloader")
 
 
 def test_info_reports_missing_ytdlp(monkeypatch) -> None:

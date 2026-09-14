@@ -276,9 +276,11 @@ def _format_eta(string_value: Any, raw_value: Any) -> str | None:
 def _reject_unsafe_directory(directory: str | None) -> None:
     if not directory:
         return
-    path = Path(directory)
-    if path.is_absolute() or ".." in path.parts:
+    path = Path(directory).expanduser()
+    if ".." in path.parts:
         raise InvalidRequestError("Unsafe directory path")
+    if not path.is_absolute():
+        raise InvalidRequestError("La carpeta debe ser una ruta absoluta")
 
 
 def _unlink_if_exists(filepath: Path) -> None:

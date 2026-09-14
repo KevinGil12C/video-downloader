@@ -22,6 +22,10 @@ const Api = (() => {
     return base;
   }
 
+  function setBase(value) {
+    base = value ? value.replace(/\/+$/, "") : null;
+  }
+
   async function json(method, path, body) {
     const options = { method, headers: { "Content-Type": "application/json" } };
     if (body !== undefined) options.body = JSON.stringify(body);
@@ -34,6 +38,7 @@ const Api = (() => {
 
   return {
     init,
+    setBase,
     getInfo: () => json("GET", "/api/info"),
     list: () => json("GET", "/api/downloads"),
     get: (id) => json("GET", "/api/downloads/" + encodeURIComponent(id)),
@@ -196,6 +201,9 @@ async function loadInfo() {
     if (data.yt_dlp_version) parts.push("yt-dlp " + data.yt_dlp_version);
     if (data.ffmpeg_available) parts.push("FFmpeg OK");
     el.info.textContent = parts.join(" · ");
+    if (!el.directory.value && data.downloads_dir) {
+      el.directory.placeholder = data.downloads_dir;
+    }
   } catch (err) {
     el.info.textContent = "backend offline";
   }
