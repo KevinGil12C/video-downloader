@@ -1,4 +1,5 @@
 """Environment information endpoint."""
+
 from __future__ import annotations
 
 import shutil

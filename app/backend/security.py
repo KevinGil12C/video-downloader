@@ -3,6 +3,7 @@
 The CORS origins are intentionally local-only. Browser extension origins
 are appended by the browser-extension phase.
 """
+
 from __future__ import annotations
 
 from urllib.parse import urlparse

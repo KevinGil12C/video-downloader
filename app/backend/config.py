@@ -14,6 +14,7 @@ Environment variables:
 
 A documented example lives in ``config.example.json``.
 """
+
 from __future__ import annotations
 
 import os

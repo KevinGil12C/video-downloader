@@ -56,7 +56,7 @@ if not "%PYTEST_EXIT%"=="0" (
     exit /b %PYTEST_EXIT%
 )
 if not "%RUFF_EXIT%"=="0" (
-    echo [WARN] ruff reported issues (exit code %RUFF_EXIT%).
+    echo [WARN] ruff reported issues - exit code %RUFF_EXIT%.
 )
 
 echo All checks passed.
