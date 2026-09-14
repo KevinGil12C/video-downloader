@@ -3,7 +3,7 @@
 -r requirements.txt
 
 # pytest: test runner and assertion helpers.
-pytest>=8.3.0,<9.0.0
+pytest>=9.1.1,<10.0.0
 # pytest-cov: test coverage reports.
 pytest-cov>=5.0.0,<7.0.0
 # httpx: HTTP client used by FastAPI TestClient (ASGITransport).
