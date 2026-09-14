@@ -113,10 +113,18 @@ scripts\start.bat
 
 1. **`git clone`** — descarga el código del repositorio.
 2. **`cd video-downloader`** — entra en la carpeta del proyecto.
-3. **`scripts\install.bat`** — crea un entorno virtual (`.venv`), instala las dependencias y verifica FFmpeg.
+3. **`scripts\install.bat`** — crea un entorno virtual (`venv`), instala las dependencias y verifica FFmpeg.
 4. **`scripts\start.bat`** — arranca la aplicación (modo Desktop) o el servidor localhost.
 
-> Los scripts `scripts/install.bat` y `scripts/start.bat` se implementan en la **Fase 2** del proyecto.
+### Scripts de utilidad
+
+| Script | Uso |
+|--------|-----|
+| `scripts\install.bat` | Crea el entorno virtual e instala dependencias. `--dev` añade las de desarrollo |
+| `scripts\start.bat` | Arranca la app en modo Desktop (por defecto) o con `--api` solo el servidor localhost |
+| `scripts\test.bat` | Ejecuta pytest y ruff (instala automáticamente las dependencias de desarrollo si faltan) |
+| `scripts\update.bat` | `git pull` + actualiza dependencias. `--dev` incluye las de desarrollo |
+| `scripts\uninstall.bat` | Elimina el entorno virtual. `--all` elimina también `downloads/` y `logs/` |
 
 ---
 
