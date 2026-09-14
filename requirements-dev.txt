@@ -13,4 +13,4 @@ ruff>=0.7.0,<1.0.0
 # mypy: optional static type checking.
 mypy>=1.11.0,<2.0.0
 # types-requests: type stubs for requests (used by some Eel internals/tests).
-types-requests>=2.32.0
+types-requests>=2.33.0.20260906
