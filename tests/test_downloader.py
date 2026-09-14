@@ -157,6 +157,31 @@ def test_download_audio_selects_bestaudio_and_postprocessor(tmp_path: Path) -> N
     assert postprocessor["preferredcodec"] == "mp3"
 
 
+def test_download_supports_selected_audio_container(tmp_path: Path) -> None:
+    out_file = tmp_path / "out.m4a"
+    out_file.write_bytes(b"data")
+    dl = FakeDL(info=completed_info(out_file))
+    service = make_service(dl, downloads_dir=tmp_path)
+
+    result = service.download(SAFE_URL, kind="audio", container="m4a")
+
+    assert result == out_file
+    assert dl.options["merge_output_format"] == "m4a"
+    assert dl.options["postprocessors"][0]["preferredcodec"] == "m4a"
+
+
+def test_download_avi_adds_video_conversion_postprocessor(tmp_path: Path) -> None:
+    out_file = tmp_path / "out.avi"
+    out_file.write_bytes(b"data")
+    dl = FakeDL(info=completed_info(out_file))
+    service = make_service(dl, downloads_dir=tmp_path)
+
+    service.download(SAFE_URL, container="avi")
+
+    assert dl.options["merge_output_format"] == "avi"
+    assert dl.options["postprocessors"][0]["key"] == "FFmpegVideoConvertor"
+
+
 def test_download_output_missing_raises(tmp_path: Path) -> None:
     dl = FakeDL(info=completed_info(tmp_path / "missing.mp4"))
     service = make_service(dl, downloads_dir=tmp_path)

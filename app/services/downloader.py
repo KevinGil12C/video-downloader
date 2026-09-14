@@ -20,6 +20,7 @@ KIND_VIDEO = "video"
 KIND_AUDIO = "audio"
 ALLOWED_KINDS = {KIND_VIDEO, KIND_AUDIO}
 ALLOWED_QUALITIES = {"best", "2160", "1440", "1080", "720", "480", "360", "240"}
+ALLOWED_CONTAINERS = {"mp4", "webm", "avi", "mp3", "m4a"}
 
 ProgressHook = Callable[[dict[str, Any]], None]
 DLBuilder = Callable[[dict[str, Any]], Any]
@@ -55,14 +56,6 @@ def format_selector(kind: str, quality: str) -> str:
         f"bestvideo[height<={quality}]+bestaudio/best[height<={quality}]"
         f"/best[height<={quality}]"
     )
-
-
-def validate_request(kind: str, quality: str) -> None:
-    """Reject unsupported kind/quality values before a download starts."""
-    if kind not in ALLOWED_KINDS:
-        raise InvalidRequestError(f"Unknown kind: {kind!r}")
-    if quality not in ALLOWED_QUALITIES:
-        raise InvalidRequestError(f"Unknown quality: {quality!r}")
 
 
 class DownloadService:
@@ -113,6 +106,7 @@ class DownloadService:
             "duration": info.get("duration"),
             "thumbnail": info.get("thumbnail"),
             "webpage_url": info.get("webpage_url") or url,
+            "formats": _normalize_formats(info.get("formats") or []),
         }
 
     def download(
@@ -121,27 +115,37 @@ class DownloadService:
         *,
         kind: str = KIND_VIDEO,
         quality: str = "best",
+        container: str | None = None,
         output_dir: Path | None = None,
         progress_hook: ProgressHook | None = None,
     ) -> Path:
         """Download the media at ``url`` and return the output file path."""
         if not is_safe_url(url):
             raise UnsupportedURLError("URL rejected by security validation")
-        validate_request(kind, quality)
+        validate_request(kind, quality, container)
 
         output_dir = Path(output_dir) if output_dir else self.downloads_dir
         output_dir.mkdir(parents=True, exist_ok=True)
 
         options = self._base_options()
         options["format"] = format_selector(kind, quality)
+        selected_container = container or ("mp3" if kind == KIND_AUDIO else "mp4")
+        options["merge_output_format"] = selected_container
         if progress_hook is not None:
             options["progress_hooks"] = [progress_hook]
         if kind == KIND_AUDIO:
             options["postprocessors"] = [
                 {
                     "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
+                    "preferredcodec": selected_container,
                     "preferredquality": "192",
+                }
+            ]
+        elif selected_container == "avi":
+            options["postprocessors"] = [
+                {
+                    "key": "FFmpegVideoConvertor",
+                    "preferedformat": "avi",
                 }
             ]
 
@@ -163,3 +167,53 @@ class DownloadService:
             if raw:
                 return Path(str(raw))
         return Path(dl.prepare_filename(info))
+
+
+def validate_request(kind: str, quality: str, container: str | None = None) -> None:
+    """Reject unsupported kind, quality, or output container values."""
+    if kind not in ALLOWED_KINDS:
+        raise InvalidRequestError(f"Unknown kind: {kind!r}")
+    if quality not in ALLOWED_QUALITIES:
+        raise InvalidRequestError(f"Unknown quality: {quality!r}")
+    if container is not None:
+        if container not in ALLOWED_CONTAINERS:
+            raise InvalidRequestError(f"Unknown container: {container!r}")
+        if kind == KIND_VIDEO and container not in {"mp4", "webm", "avi"}:
+            raise InvalidRequestError("Video container must be mp4, webm, or avi")
+        if kind == KIND_AUDIO and container not in {"mp3", "m4a"}:
+            raise InvalidRequestError("Audio container must be mp3 or m4a")
+
+
+def _normalize_formats(formats: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Expose only selectable video heights and audio bitrates."""
+    video: dict[str, dict[str, Any]] = {}
+    audio: dict[str, dict[str, Any]] = {}
+    for item in formats:
+        format_id = str(item.get("format_id") or "")
+        height = item.get("height")
+        if isinstance(height, int) and height > 0:
+            quality = str(height)
+            video.setdefault(
+                quality,
+                {
+                    "quality": quality,
+                    "format_id": format_id,
+                    "ext": item.get("ext") or "mp4",
+                    "has_audio": item.get("acodec") not in {None, "none"},
+                },
+            )
+        abr = item.get("abr")
+        if isinstance(abr, (int, float)) and abr > 0:
+            bitrate = str(int(abr))
+            audio.setdefault(
+                bitrate,
+                {
+                    "quality": bitrate,
+                    "format_id": format_id,
+                    "ext": item.get("ext") or "m4a",
+                },
+            )
+    return {
+        "video": sorted(video.values(), key=lambda item: int(item["quality"]), reverse=True),
+        "audio": sorted(audio.values(), key=lambda item: int(item["quality"]), reverse=True),
+    }

@@ -39,7 +39,7 @@ const Api = (() => {
   return {
     init,
     setBase,
-    getInfo: () => json("GET", "/api/info"),
+    getInfo: (url) => json("GET", "/api/info" + (url ? "?url=" + encodeURIComponent(url) : "")),
     list: () => json("GET", "/api/downloads"),
     get: (id) => json("GET", "/api/downloads/" + encodeURIComponent(id)),
     create: (payload) => json("POST", "/api/downloads", payload),
@@ -55,8 +55,11 @@ const el = {
   form: document.getElementById("download-form"),
   url: document.getElementById("url"),
   format: document.getElementById("format"),
+  container: document.getElementById("container"),
   quality: document.getElementById("quality"),
   directory: document.getElementById("directory"),
+  directoryPicker: document.getElementById("directory-picker"),
+  chooseDirectory: document.getElementById("choose-directory"),
   submit: document.getElementById("submit"),
   list: document.getElementById("downloads"),
   empty: document.getElementById("empty"),
@@ -146,8 +149,31 @@ function renderItem(item) {
   return article;
 }
 
-function syncQuality() {
-  el.quality.disabled = el.format.value === "audio";
+function renderQualities(media) {
+  const key = el.format.value === "audio" ? "audio" : "video";
+  const values = media?.formats?.[key] || [];
+  el.quality.replaceChildren(new Option("Mejor calidad", "best"));
+  values.forEach((item) => {
+    const suffix = key === "audio" ? " kbps" : "p";
+    el.quality.add(new Option(item.quality + suffix, item.quality));
+  });
+  el.quality.disabled = values.length === 0;
+}
+
+async function analyzeUrl() {
+  const url = el.url.value.trim();
+  if (!url) {
+    el.url.focus();
+    return;
+  }
+  try {
+    const response = await Api.getInfo(url);
+    renderQualities(response.media);
+    el.info.textContent = response.media?.title || "URL analizada";
+  } catch (err) {
+    renderQualities(null);
+    window.alert("No se pudo analizar la URL:\n" + err.message);
+  }
 }
 
 async function onCreate(event) {
@@ -157,10 +183,15 @@ async function onCreate(event) {
     el.url.focus();
     return;
   }
+  if (el.quality.disabled) {
+    await analyzeUrl();
+    if (el.quality.disabled) return;
+  }
   const payload = {
     url,
     format: el.format.value,
-    quality: el.format.value === "audio" ? "best" : el.quality.value,
+    container: el.container.value,
+    quality: el.quality.value,
   };
   const directory = el.directory.value.trim();
   if (directory) payload.directory = directory;
@@ -280,9 +311,33 @@ function stopPolling() {
 }
 
 el.form.addEventListener("submit", onCreate);
-el.format.addEventListener("change", syncQuality);
+el.url.addEventListener("change", analyzeUrl);
+el.url.addEventListener("blur", analyzeUrl);
+el.format.addEventListener("change", () => {
+  const audio = el.format.value === "audio";
+  el.container.replaceChildren(
+    ...(audio
+      ? [new Option("MP3", "mp3"), new Option("M4A", "m4a")]
+      : [new Option("MP4", "mp4"), new Option("WebM", "webm"), new Option("AVI", "avi")]),
+  );
+  renderQualities(null);
+});
+el.chooseDirectory.addEventListener("click", async () => {
+  if (window.eel && typeof window.eel.select_download_folder === "function") {
+    const selected = await new Promise((resolve) => eel.select_download_folder()(resolve));
+    if (selected) el.directory.value = selected;
+    return;
+  }
+  el.directoryPicker.click();
+});
+el.directoryPicker.addEventListener("change", () => {
+  const file = el.directoryPicker.files?.[0];
+  if (file?.webkitRelativePath) {
+    el.directory.value = file.webkitRelativePath.split("/")[0];
+  }
+});
 el.refresh.addEventListener("click", refreshList);
-syncQuality();
+renderQualities(null);
 
 Api.init().then(() => {
   connectSocket();

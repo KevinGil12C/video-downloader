@@ -30,27 +30,31 @@
             required
             spellcheck="false"
           />
+          <input id="directory-picker" type="file" webkitdirectory directory hidden />
+          <button id="choose-directory" class="btn" type="button">Elegir carpeta…</button>
 
           <div class="form-grid">
             <div class="field">
-              <label for="format">Formato</label>
+              <label for="format">Tipo</label>
               <select id="format" name="format">
                 <option value="video" selected>Vídeo</option>
-                <option value="audio">Audio (MP3)</option>
+                <option value="audio">Audio</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="container">Contenedor</label>
+              <select id="container" name="container">
+                <option value="mp4" selected>MP4</option>
+                <option value="webm">WebM</option>
+                <option value="avi">AVI</option>
               </select>
             </div>
 
             <div class="field">
               <label for="quality">Calidad</label>
               <select id="quality" name="quality">
-                <option value="best" selected>Máxima</option>
-                <option value="2160">2160p (4K)</option>
-                <option value="1440">1440p</option>
-                <option value="1080">1080p</option>
-                <option value="720">720p</option>
-                <option value="480">480p</option>
-                <option value="360">360p</option>
-                <option value="240">240p</option>
+                <option value="best" selected>Analiza una URL primero</option>
               </select>
             </div>
 

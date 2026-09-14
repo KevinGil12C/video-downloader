@@ -28,6 +28,7 @@ class InfoResponse(BaseModel):
     ffmpeg_version: str | None = None
     downloads_dir: str
     platform: str
+    media: dict[str, object] | None = None
 
 
 class DownloadCreateRequest(BaseModel):
@@ -35,6 +36,7 @@ class DownloadCreateRequest(BaseModel):
 
     url: str
     format: Literal["video", "audio"] = "video"
+    container: Literal["mp4", "webm", "avi", "mp3", "m4a"] | None = None
     quality: str = "best"
     directory: str | None = None
 
@@ -45,6 +47,7 @@ class DownloadResponse(BaseModel):
     id: str
     url: str
     format: Literal["video", "audio"]
+    container: str = "mp4"
     quality: str
     status: DownloadStatus = "pending"
     progress: float = Field(default=0.0, ge=0, le=100)

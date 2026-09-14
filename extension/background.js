@@ -64,6 +64,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           sendResponse({ ok: true, data });
           break;
         }
+        case "info": {
+          const data = await apiRequest(
+            "GET",
+            "/api/info?url=" + encodeURIComponent(message.url),
+            undefined,
+            settings.apiBase,
+          );
+          sendResponse({ ok: true, data });
+          break;
+        }
         case "list": {
           const data = await apiRequest("GET", "/api/downloads", undefined, settings.apiBase);
           sendResponse({ ok: true, data });
@@ -75,6 +85,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             {
               url: message.url,
               format,
+              container: message.container,
               quality: message.quality || (format === "audio" ? "best" : settings.quality),
               directory: message.directory,
             },
@@ -95,6 +106,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             {
               url,
               format,
+              container: message.container,
               quality: message.quality || (format === "audio" ? "best" : settings.quality),
               directory: message.directory,
             },

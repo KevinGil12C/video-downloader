@@ -57,6 +57,7 @@ class DownloadRecord:
     url: str
     kind: str
     quality: str
+    container: str = "mp4"
     status: str = "pending"
     progress: float = 0.0
     file: str | None = None
@@ -107,12 +108,14 @@ class DownloadManager:
         *,
         kind: str = KIND_VIDEO,
         quality: str = "best",
+        container: str | None = None,
         directory: str | None = None,
     ) -> DownloadRecord:
         """Validate a request, register it and start it in the background."""
         if not is_safe_url(url):
             raise UnsupportedURLError("URL rejected by security validation")
-        validate_request(kind, quality)
+        selected_container = container or ("mp3" if kind == "audio" else "mp4")
+        validate_request(kind, quality, selected_container)
         _reject_unsafe_directory(directory)
 
         record = DownloadRecord(
@@ -120,6 +123,7 @@ class DownloadManager:
             url=url,
             kind=kind,
             quality=quality,
+            container=selected_container,
         )
         self._downloads[record.id] = record
 
@@ -187,6 +191,7 @@ class DownloadManager:
                     record.url,
                     kind=record.kind,
                     quality=record.quality,
+                    container=record.container,
                     output_dir=downloads_dir,
                     progress_hook=progress_hook,
                 )

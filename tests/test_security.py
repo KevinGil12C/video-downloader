@@ -1,6 +1,10 @@
 """Tests for app.backend.security input validation helpers."""
 
-from app.backend.security import allowed_cors_origins, is_safe_url
+from app.backend.security import (
+    allowed_cors_origin_regex,
+    allowed_cors_origins,
+    is_safe_url,
+)
 
 
 def test_is_safe_url_accepts_http_https() -> None:
@@ -30,3 +34,12 @@ def test_allowed_cors_origins_return_sorted_local_origins() -> None:
     assert origins == sorted(origins)
     for origin in origins:
         assert origin.startswith(("http://localhost:", "http://127.0.0.1:"))
+
+
+def test_extension_cors_origin_is_restricted_to_extension_schemes() -> None:
+    import re
+
+    pattern = re.compile(allowed_cors_origin_regex())
+    assert pattern.fullmatch("chrome-extension://abcdefghijklmnop")
+    assert pattern.fullmatch("moz-extension://abcdefghijklmnop")
+    assert pattern.fullmatch("https://attacker.example") is None

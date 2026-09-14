@@ -61,6 +61,20 @@ def get_app_info() -> dict[str, Any]:
     }
 
 
+@eel.expose
+def select_download_folder() -> str | None:
+    """Open the native Windows folder picker for the desktop UI."""
+    import tkinter as tk
+    from tkinter import filedialog
+
+    root = tk.Tk()
+    root.withdraw()
+    try:
+        return filedialog.askdirectory(title="Selecciona la carpeta de descarga") or None
+    finally:
+        root.destroy()
+
+
 def _browser_mode() -> str | Literal[False]:
     """Eel browser mode, overridable with ``VD_BROWSER`` (default Edge)."""
     raw = os.getenv("VD_BROWSER", "edge").strip().lower()

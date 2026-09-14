@@ -9,6 +9,7 @@ not subject to CORS.
 
 from __future__ import annotations
 
+import re
 from urllib.parse import urlparse
 
 from starlette.datastructures import Headers
@@ -19,6 +20,7 @@ from app.backend.config import get_settings
 
 _ALLOWED_URL_SCHEMES = {"http", "https"}
 _MAX_URL_LENGTH = 2048
+_EXTENSION_ORIGIN = re.compile(r"^(chrome-extension|moz-extension)://[a-z0-9-]+$")
 
 
 class RejectDisallowedOrigin:
@@ -43,7 +45,11 @@ class RejectDisallowedOrigin:
             await self.app(scope, receive, send)
             return
         origin = Headers(scope=scope).get("origin")
-        if origin is not None and origin not in self.allowed:
+        if (
+            origin is not None
+            and origin not in self.allowed
+            and _EXTENSION_ORIGIN.fullmatch(origin) is None
+        ):
             response = PlainTextResponse("Forbidden", status_code=403)
             await response(scope, receive, send)
             return
@@ -61,6 +67,11 @@ def allowed_cors_origins() -> list[str]:
     }
     origins.update(settings.allowed_origins)
     return sorted(origins)
+
+
+def allowed_cors_origin_regex() -> str:
+    """Allow browser extensions while keeping the origin scheme restricted."""
+    return r"^(chrome-extension|moz-extension)://[a-z0-9-]+$"
 
 
 def is_safe_url(url: str) -> bool:

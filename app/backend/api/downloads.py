@@ -36,6 +36,7 @@ def _to_response(record: DownloadRecord) -> DownloadResponse:
         id=record.id,
         url=record.url,
         format=cast(Literal["video", "audio"], record.kind),
+        container=getattr(record, "container", "mp4"),
         quality=record.quality,
         status=cast(DownloadStatus, record.status),
         progress=record.progress,
@@ -52,12 +53,14 @@ async def create_download(
     manager: Manager,
 ) -> DownloadResponse:
     try:
-        record = await manager.create(
-            payload.url,
-            kind=payload.format,
-            quality=payload.quality,
-            directory=payload.directory,
-        )
+        arguments = {
+            "kind": payload.format,
+            "quality": payload.quality,
+            "directory": payload.directory,
+        }
+        if payload.container is not None:
+            arguments["container"] = payload.container
+        record = await manager.create(payload.url, **arguments)
     except DownloaderError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return _to_response(record)

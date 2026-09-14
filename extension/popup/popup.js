@@ -3,6 +3,7 @@
 const DEFAULT_SETTINGS = {
   apiBase: "http://127.0.0.1:8000",
   format: "video",
+  container: "mp4",
   quality: "best",
 };
 
@@ -21,8 +22,10 @@ const el = {
   form: document.getElementById("download-form"),
   url: document.getElementById("url"),
   format: document.getElementById("format"),
+  container: document.getElementById("container"),
   quality: document.getElementById("quality"),
   directory: document.getElementById("directory"),
+  chooseDirectory: document.getElementById("choose-directory"),
   download: document.getElementById("download"),
   formError: document.getElementById("form-error"),
   list: document.getElementById("list"),
@@ -35,6 +38,15 @@ function send(message) {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (response) => resolve(response));
   });
+}
+
+function updateContainers() {
+  const audio = el.format.value === "audio";
+  el.container.replaceChildren(
+    ...(audio
+      ? [new Option("MP3", "mp3"), new Option("M4A", "m4a")]
+      : [new Option("MP4", "mp4"), new Option("WebM", "webm"), new Option("AVI", "avi")]),
+  );
 }
 
 function esc(value) {
@@ -109,12 +121,45 @@ async function refresh() {
   el.list.replaceChildren(...items.map(renderItem));
 }
 
+function renderQualities(media) {
+  const values = media?.formats?.[el.format.value === "audio" ? "audio" : "video"] || [];
+  el.quality.replaceChildren(new Option("Mejor calidad", "best"));
+  values.forEach((item) => {
+    const suffix = el.format.value === "audio" ? " kbps" : "p";
+    el.quality.add(new Option(item.quality + suffix, item.quality));
+  });
+  el.quality.disabled = values.length === 0;
+}
+
+async function analyzeUrl(url) {
+  if (!url) {
+    showError("No se detectó una URL HTTP/HTTPS.");
+    return;
+  }
+  const result = await send({ type: "info", url });
+  if (!result || !result.ok) {
+    showError(result && result.error ? result.error : "No se pudo analizar la URL.");
+    return;
+  }
+  renderQualities(result.data.media);
+}
+
 async function onSubmit(event) {
   event.preventDefault();
   hideError();
   const explicit = el.url.value.trim();
   const format = el.format.value;
-  const quality = format === "audio" ? "best" : el.quality.value;
+  const quality = el.quality.value;
+  let media;
+  if (explicit) {
+    const info = await send({ type: "info", url: explicit });
+    if (!info || !info.ok) {
+      showError(info && info.error ? info.error : "No se pudo analizar la URL.");
+      return;
+    }
+    media = info.data.media;
+    renderQualities(media);
+  }
   el.download.disabled = true;
   try {
     const result = explicit
@@ -122,12 +167,14 @@ async function onSubmit(event) {
           type: "submit",
           url: explicit,
           format,
+          container: el.container.value,
           quality,
           directory: el.directory.value.trim() || undefined,
         })
       : await send({
           type: "capture",
           format,
+          container: el.container.value,
           quality,
           directory: el.directory.value.trim() || undefined,
         });
@@ -135,6 +182,7 @@ async function onSubmit(event) {
       showError(result && result.error ? result.error : "No respondió el backend local.");
       return;
     }
+
     el.url.value = result.url || "";
     await refresh();
   } finally {
@@ -145,6 +193,7 @@ async function onSubmit(event) {
 async function loadSettings() {
   const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
   el.format.value = settings.format;
+  el.container.value = settings.container;
   el.quality.value = settings.quality;
 }
 
@@ -152,6 +201,7 @@ async function prefill() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && /^https?:/i.test(tab.url || "")) {
     el.url.value = tab.url;
+    await analyzeUrl(tab.url);
   }
 }
 
@@ -161,15 +211,24 @@ async function openDashboard() {
 }
 
 el.form.addEventListener("submit", onSubmit);
+el.chooseDirectory.addEventListener("click", () => {
+  const selected = window.prompt(
+    "Escribe la ruta absoluta de la carpeta de descarga:",
+    el.directory.value || "",
+  );
+  if (selected !== null) el.directory.value = selected.trim();
+});
 el.openOptions.addEventListener("click", () => chrome.runtime.openOptionsPage());
 el.openUi.addEventListener("click", openDashboard);
 el.format.addEventListener("change", () => {
-  el.quality.disabled = el.format.value === "audio";
+  updateContainers();
+  renderQualities(null);
 });
 
 (async () => {
   await loadSettings();
-  el.quality.disabled = el.format.value === "audio";
+  updateContainers();
+  renderQualities(null);
   await prefill();
 
   const health = await send({ type: "health" });

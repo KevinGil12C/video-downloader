@@ -23,7 +23,12 @@ def test_manifest_is_valid_mv3() -> None:
     assert manifest["background"]["service_worker"] == "background.js"
     assert manifest["action"]["default_popup"] == "popup/popup.html"
     assert manifest["options_page"] == "options/options.html"
-    assert set(manifest["permissions"]) == {"activeTab", "scripting", "storage"}
+    assert set(manifest["permissions"]) == {
+        "activeTab",
+        "tabs",
+        "scripting",
+        "storage",
+    }
 
 
 def test_host_permissions_are_local_only() -> None:
@@ -59,7 +64,7 @@ def test_content_script_targets_page_video_sources() -> None:
         assert selector in text
 
 
-def test_extension_origins_do_not_bypass_cors() -> None:
+def test_extension_origin_is_allowed_for_local_api() -> None:
     response = client.options(
         "/api/downloads",
         headers={
@@ -67,5 +72,7 @@ def test_extension_origins_do_not_bypass_cors() -> None:
             "Access-Control-Request-Method": "POST",
         },
     )
-    assert response.status_code == 403
-    assert "access-control-allow-origin" not in response.headers
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == (
+        "chrome-extension://deadbeefdeadbeefdeadbeefdeadbeef"
+    )

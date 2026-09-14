@@ -19,26 +19,31 @@
 
         <div class="row">
           <div class="field">
-            <label for="format">Formato</label>
+            <label for="format">Tipo</label>
             <select id="format">
               <option value="video">Vídeo</option>
-              <option value="audio">Audio (MP3)</option>
+              <option value="audio">Audio</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="container">Contenedor</label>
+            <select id="container">
+              <option value="mp4">MP4</option>
+              <option value="webm">WebM</option>
+              <option value="avi">AVI</option>
             </select>
           </div>
           <div class="field">
             <label for="quality">Calidad</label>
             <select id="quality">
-              <option value="best">Máxima</option>
-              <option value="1080">1080p</option>
-              <option value="720">720p</option>
-              <option value="480">480p</option>
-              <option value="360">360p</option>
+              <option value="best">Analiza la URL primero</option>
             </select>
           </div>
         </div>
 
         <label for="directory">Carpeta de descarga</label>
         <input id="directory" type="text" placeholder="Usar carpeta configurada" spellcheck="false" />
+        <button id="choose-directory" type="button">Elegir carpeta</button>
 
         <button id="download" type="submit" class="primary">Descargar</button>
         <p class="error" id="form-error" hidden></p>
