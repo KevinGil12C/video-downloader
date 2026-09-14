@@ -10,7 +10,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.backend.api import downloads, health, info
+from app.backend.api import downloads, health, info, ws
 from app.backend.config import APP_VERSION, get_settings
 from app.backend.security import allowed_cors_origins
 
@@ -40,6 +40,7 @@ def create_app() -> FastAPI:
     application.include_router(health.router)
     application.include_router(info.router)
     application.include_router(downloads.router)
+    application.include_router(ws.router)
 
     return application
 

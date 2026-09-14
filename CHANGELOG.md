@@ -20,6 +20,10 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Servicio Download manager (`app/services/manager.py`): cola en memoria con `DownloadRecord`, descargas en segundo plano con límite de concurrencia, cancelación cooperativa y borrado de historial.
 - Endpoints de descargas en `app/backend/api/downloads.py`: `POST/GET /api/downloads`, `GET/DELETE /api/downloads/{id}` y `POST /api/downloads/{id}/cancel` (registrados en `create_app`).
 - Tests del manager (ciclo de vida, cancelación, concurrencia) y del contrato HTTP de descargas con el manager sustituido por un stub.
+- Sistema de progreso (`app/services/progress.py`): `ProgressEvent` y `ProgressHub` que retransmiten cambios de estado por WebSocket de forma segura desde hilos.
+- Endpoint WebSocket `WS /ws/progress` (`app/backend/api/ws.py`): envía el estado actual al conectar y stream de actualizaciones (`download_id`, `status`, `progress`, `speed`, `eta`).
+- El manager ahora captura y emite `speed`/`eta` formateados y admite un listener de actualizaciones (`set_update_listener`).
+- Tests del hub de progreso y del stream WebSocket completo con fakes (`tests/test_progress.py`, `tests/test_progress_ws.py`).
 
 ### Changed
 ### Fixed

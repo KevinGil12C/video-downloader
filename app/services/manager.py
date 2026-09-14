@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -59,6 +60,8 @@ class DownloadRecord:
     status: str = "pending"
     progress: float = 0.0
     file: str | None = None
+    speed: str | None = None
+    eta: str | None = None
     error_message: str | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -75,12 +78,14 @@ class DownloadManager:
         dl_builder: DLBuilder | None = None,
         ffmpeg_location: str | None = None,
         max_concurrent: int = 3,
+        on_update: Callable[[DownloadRecord], None] | None = None,
     ) -> None:
         from app.backend.config import get_settings
 
         self._downloads_dir = downloads_dir or get_settings().downloads_dir
         self._ffmpeg_location = ffmpeg_location
         self._dl_builder = dl_builder or yt_dlp.YoutubeDL
+        self._on_update = on_update
         self._downloads: dict[str, DownloadRecord] = {}
         self._tasks: set[asyncio.Task[None]] = set()
         self._semaphore = asyncio.Semaphore(max_concurrent)
@@ -171,7 +176,10 @@ class DownloadManager:
                 percent = _parse_percent(data.get("_percent_str"))
                 if percent is not None:
                     record.progress = percent
+                record.speed = _format_speed(data.get("_speed_str"), data.get("speed"))
+                record.eta = _format_eta(data.get("_eta_str"), data.get("eta"))
                 record.updated_at = datetime.now(timezone.utc)
+                self._emit(record)
 
             try:
                 file_path = await asyncio.to_thread(
@@ -204,6 +212,17 @@ class DownloadManager:
     def _set_status(self, record: DownloadRecord, status: str) -> None:
         record.status = status
         record.updated_at = datetime.now(timezone.utc)
+        self._emit(record)
+
+    def _emit(self, record: DownloadRecord) -> None:
+        if self._on_update is not None:
+            self._on_update(record)
+
+    def set_update_listener(
+        self, on_update: Callable[[DownloadRecord], None] | None
+    ) -> None:
+        """Replace the listener notified on every record change."""
+        self._on_update = on_update
 
     async def wait_all(self) -> None:
         """Block until all scheduled downloads finish (used by tests)."""
@@ -216,6 +235,42 @@ def _parse_percent(raw: Any) -> float | None:
         return float(str(raw).strip().rstrip("%"))
     except (TypeError, ValueError):
         return None
+
+
+_SPEED_UNITS = ("B/s", "KiB/s", "MiB/s", "GiB/s", "TiB/s")
+
+
+def _format_speed(string_value: Any, raw_value: Any) -> str | None:
+    """Return a human read speed string, preferring yt-dlp's own formatter."""
+    if string_value:
+        return str(string_value).strip()
+    try:
+        speed = float(raw_value)
+    except (TypeError, ValueError):
+        return None
+    if speed < 0:
+        return None
+    size = speed
+    for unit in _SPEED_UNITS:
+        if size < 1024:
+            return f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} PiB/s"
+
+
+def _format_eta(string_value: Any, raw_value: Any) -> str | None:
+    """Return an ``HH:MM:SS`` ETA string from a yt-dlp hook payload."""
+    if string_value:
+        return str(string_value).strip()
+    try:
+        seconds = int(raw_value)
+    except (TypeError, ValueError):
+        return None
+    if seconds < 0:
+        return None
+    hours, remainder = divmod(seconds, 3600)
+    minutes, secs = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
 def _reject_unsafe_directory(directory: str | None) -> None:
