@@ -174,7 +174,9 @@ WebSocket opcional para recibir eventos de progreso sin polling.
 
 La API restringe CORS a:
 
-- Orígenes `http://localhost:*` y `http://127.0.0.1:*`.
-- Extensiones de navegador locales (Chrome/Brave/Edge): `chrome-extension://*`, `brave://*`, `edge://*` (o el patrón de origin de la extensión instalada, ver [security.md](security.md)).
+- `http://localhost` y `http://127.0.0.1` en el puerto del API y en el de la ventana Eel (jugador de escritorio, puerto API + 1).
+- Cualquier origen adicional declarado en `VD_ALLOWED_ORIGINS`.
+
+> La **extensión de navegador no aparece en la allowlist**: en Manifest V3, las peticiones con `host_permissions` hacia la API local no se rigen por CORS (ver [security.md](security.md)).
 
 Cualquier otro origen no autorizado recibirá el bloqueo CORS del navegador.

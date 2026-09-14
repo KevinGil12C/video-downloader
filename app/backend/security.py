@@ -1,9 +1,10 @@
 """Security helpers: CORS allowlist and input validation.
 
-The CORS origins are intentionally local-only. They cover the API port, the
-Eel desktop window (API port + 1) and any extra origins passed through the
-``VD_ALLOWED_ORIGINS`` environment variable. Browser-extension origins are
-appended by the browser-extension phase.
+The CORS origins are intentionally local-only. They cover the API origin
+and the Eel desktop window (API port + 1), plus any extra origins passed
+through the ``VD_ALLOWED_ORIGINS`` environment variable. The browser
+extension does not appear here because MV3 ``host_permissions`` calls are
+not subject to CORS.
 """
 
 from __future__ import annotations

@@ -30,6 +30,9 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Frontend completo (`web/index.html`, `web/css/style.css`, `web/js/app.js`): formulario de descarga (URL, formato, calidad, subcarpeta opcional), lista de descargas con barra de progreso, velocidad, ETA, estado y errores, cancelación y borrado, actualización en tiempo real vía `WS /ws/progress` con sondeo HTTP como fallback, y comprobación del estado del backend (`/api/info`).
 - El backend ahora sirve la UI estática en `/` (`StaticFiles`) y CORS incluye el origen de la ventana Eel (puerto API + 1); el JS resuelve la base del API vía `eel.get_app_info()` en escritorio con fallback al mismo origen.
 - Tests del frontend: index y assets servidos, prioridad de rutas `/api` sobre estáticos, 404 y expansión CORS del origen de escritorio (`tests/test_frontend.py`).
+- Extensión de navegador Manifest V3 (`extension/`): popup para enviar la URL de la pestaña activa o capturada (`content.js` inyectado) a `POST /api/downloads`, lista de descargas con progreso/cancelar/eliminar, página de opciones (`chrome.storage.sync`) y service worker que solo llama a los endpoints locales de la API.
+- La extensión usa `host_permissions` solo hacia `127.0.0.1:8000`/`localhost:8000`; al no regirse por CORS, los orígenes `chrome-extension://` no se añaden a la allowlist del servidor (superficie mínima).
+- Tests de la extensión: manifest MV3 válido, permisos y hosts locales, archivos referenciados presentes, endpoints coherentes con el backend y verificación de que un origen `chrome-extension://` no elude CORS (`tests/test_extension.py`).
 
 ### Changed
 ### Fixed

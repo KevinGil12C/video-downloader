@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Video Downloader Local",
+  "version": "0.1.0",
+  "description": "Envía vídeos de la pestaña activa a la API local de Video Downloader.",
+  "minimum_chrome_version": "102",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Video Downloader Local",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ]
+}

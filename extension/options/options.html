@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Opciones · Video Downloader Local</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="page">
+      <h1>Opciones de la extensión</h1>
+
+      <form id="form">
+        <label for="apiBase">URL de la API local</label>
+        <input id="apiBase" type="url" spellcheck="false" autocomplete="off" />
+        <p class="hint">
+          El manifest solo concede acceso a
+          <code>http://127.0.0.1:8000</code> y <code>http://localhost:8000</code>.
+          Si el backend usa otro puerto, actualiza <code>host_permissions</code>
+          en <code>manifest.json</code>.
+        </p>
+
+        <label for="format">Formato por defecto</label>
+        <select id="format">
+          <option value="video">Vídeo</option>
+          <option value="audio">Audio (MP3)</option>
+        </select>
+
+        <label for="quality">Calidad por defecto</label>
+        <select id="quality">
+          <option value="best">Máxima</option>
+          <option value="1080">1080p</option>
+          <option value="720">720p</option>
+          <option value="480">480p</option>
+          <option value="360">360p</option>
+        </select>
+
+        <div class="actions">
+          <button id="save" type="submit" class="primary">Guardar</button>
+          <button id="reset" type="button">Restablecer</button>
+        </div>
+        <p id="saved" class="saved" hidden>Configuración guardada.</p>
+      </form>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>

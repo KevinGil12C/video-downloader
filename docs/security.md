@@ -23,8 +23,9 @@ Documento técnico sobre las decisiones de seguridad de **Video Downloader Local
 
 La aplicación define una **allowlist de orígenes**:
 
-- `http://localhost:*` y `http://127.0.0.1:*` para el frontend.
-- `chrome-extension://...`, `edge://...` y los orígenes de extensiones MV3 para las extensiones.
+- `http://localhost` y `http://127.0.0.1` en el puerto de la API y en el puerto de la ventana Eel (API + 1).
+- Orígenes extra explícitos vía `VD_ALLOWED_ORIGINS`.
+- La **extensión MV3 no necesita CORS**: sus peticiones con `host_permissions` hacia la API local no se rigen por CORS, por lo que sus orígenes `chrome-extension://...` **no** se añaden a la allowlist.
 - Cualquier petición con `Origin` no autorizada es rechazada por el navegador (reglas CORS).
 
 La implementación valida la cabecera `Origin` en el middleware y **no** usa `allow_origin_regex=".*"`.

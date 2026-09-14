@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Video Downloader Local</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <span class="dot" id="status-dot"></span>
+      <span class="title">Video Downloader Local</span>
+      <span class="status" id="status">comprobando&hellip;</span>
+    </header>
+
+    <main>
+      <form id="download-form">
+        <label for="url">URL del vídeo</label>
+        <input id="url" type="text" placeholder="https://&hellip;" spellcheck="false" />
+
+        <div class="row">
+          <div class="field">
+            <label for="format">Formato</label>
+            <select id="format">
+              <option value="video">Vídeo</option>
+              <option value="audio">Audio (MP3)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quality">Calidad</label>
+            <select id="quality">
+              <option value="best">Máxima</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="download" type="submit" class="primary">Descargar</button>
+        <p class="error" id="form-error" hidden></p>
+      </form>
+
+      <section class="recent">
+        <h2>Descargas</h2>
+        <p class="empty" id="empty" hidden>Sin descargas.</p>
+        <ul id="list"></ul>
+      </section>
+    </main>
+
+    <footer>
+      <button id="open-options" type="button">Opciones</button>
+      <button id="open-ui" type="button">Abrir panel</button>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

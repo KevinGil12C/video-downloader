@@ -1,0 +1,257 @@
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1c1e21;
+  --muted: #5f6672;
+  --border: #e3e5e8;
+  --primary: #2d7ff9;
+  --danger: #d64545;
+  --ok: #2ea043;
+  --warn: #b8860b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --card: #1b1f27;
+    --text: #e8eaed;
+    --muted: #9aa3b2;
+    --border: #2a2f3a;
+    --primary: #4d94ff;
+    --danger: #e06666;
+    --ok: #46b162;
+    --warn: #d2a424;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 320px;
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  flex: none;
+}
+
+.dot.offline {
+  background: var(--danger);
+}
+
+.title {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.status {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+main {
+  padding: 0.8rem 0.9rem;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0.6rem 0 0.25rem;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.primary {
+  width: 100%;
+  margin-top: 0.7rem;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.5rem;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  margin: 0.5rem 0 0;
+}
+
+.recent h2 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 1rem 0 0.4rem;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+li {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.badge {
+  flex: none;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.badge-downloading,
+.badge-pending {
+  color: var(--warn);
+}
+
+.badge-completed {
+  color: var(--ok);
+}
+
+.badge-error {
+  color: var(--danger);
+}
+
+.progress {
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 0%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.item-meta {
+  display: flex;
+  gap: 0.6rem;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.actions button {
+  font-size: 10px;
+  padding: 0.2rem 0.55rem;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+
+footer button {
+  font-size: 11px;
+}
