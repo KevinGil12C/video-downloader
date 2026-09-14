@@ -41,6 +41,7 @@ Devuelve el estado del entorno: versión de la aplicación, presencia de yt-dlp 
   "version": "0.1.0",
   "yt_dlp_version": "2024.12.13",
   "ffmpeg_available": true,
+  "ffmpeg_version": "ffmpeg version 7.1.1 ...",
   "downloads_dir": "C:\\...\\downloads",
   "platform": "Windows"
 }

@@ -20,5 +20,6 @@ class InfoResponse(BaseModel):
     version: str
     yt_dlp_version: str | None
     ffmpeg_available: bool
+    ffmpeg_version: str | None = None
     downloads_dir: str
     platform: str

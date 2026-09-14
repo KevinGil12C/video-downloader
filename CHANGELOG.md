@@ -15,6 +15,8 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Servicio de descarga (`app/services/downloader.py`) sobre yt-dlp: extracción de metadatos, selector de formato video/audio y calidad, hooks de progreso, inyectable para tests.
 - Primeros tests unitarios (`tests/test_downloader.py`) con yt-dlp simulado, sin descargas reales.
 - Ruff: sección isort con `app` como primer-party; pytest: `pythonpath = ["."]`.
+- Servicio FFmpeg (`app/services/ffmpeg.py`): búsqueda del binario (proyecto/PATH), verificación y reporte de versión; `/api/info` expone `ffmpeg_available` y `ffmpeg_version`.
+- Tests del servicio FFmpeg con `subprocess` simulado (`tests/test_ffmpeg.py`).
 
 ### Changed
 ### Fixed
