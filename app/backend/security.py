@@ -1,12 +1,16 @@
 """Security helpers: CORS allowlist and input validation.
 
-The CORS origins are intentionally local-only. Browser extension origins
-are appended by the browser-extension phase.
+The CORS origins are intentionally local-only. They cover the API port, the
+Eel desktop window (API port + 1) and any extra origins passed through the
+``VD_ALLOWED_ORIGINS`` environment variable. Browser-extension origins are
+appended by the browser-extension phase.
 """
 
 from __future__ import annotations
 
 from urllib.parse import urlparse
+
+from app.backend.config import get_settings
 
 _ALLOWED_URL_SCHEMES = {"http", "https"}
 _MAX_URL_LENGTH = 2048
@@ -14,7 +18,15 @@ _MAX_URL_LENGTH = 2048
 
 def allowed_cors_origins() -> list[str]:
     """Local-only origins the API is willing to answer to."""
-    return ["http://localhost:8000", "http://127.0.0.1:8000"]
+    settings = get_settings()
+    origins = {
+        f"http://localhost:{settings.port}",
+        f"http://127.0.0.1:{settings.port}",
+        f"http://localhost:{settings.port + 1}",
+        f"http://127.0.0.1:{settings.port + 1}",
+    }
+    origins.update(settings.allowed_origins)
+    return sorted(origins)
 
 
 def is_safe_url(url: str) -> bool:

@@ -27,6 +27,9 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Shell de escritorio Eel (`app/desktop/main.py`): arranca el backend FastAPI en segundo plano (`UvicornThread`), inicializa `web/` y abre la ventana con Edge/Chrome; expone `get_app_info` y permite modo headless (`VD_BROWSER=false`).
 - UI provisional de escritorio (`web/index.html`) con comprobación de estado del backend, que se reemplazará en la fase de frontend.
 - Tests del shell: arranque/parada de uvicorn, info expuesta al UI y boot completo con `eel.start` simulado (`tests/test_desktop.py`).
+- Frontend completo (`web/index.html`, `web/css/style.css`, `web/js/app.js`): formulario de descarga (URL, formato, calidad, subcarpeta opcional), lista de descargas con barra de progreso, velocidad, ETA, estado y errores, cancelación y borrado, actualización en tiempo real vía `WS /ws/progress` con sondeo HTTP como fallback, y comprobación del estado del backend (`/api/info`).
+- El backend ahora sirve la UI estática en `/` (`StaticFiles`) y CORS incluye el origen de la ventana Eel (puerto API + 1); el JS resuelve la base del API vía `eel.get_app_info()` en escritorio con fallback al mismo origen.
+- Tests del frontend: index y assets servidos, prioridad de rutas `/api` sobre estáticos, 404 y expansión CORS del origen de escritorio (`tests/test_frontend.py`).
 
 ### Changed
 ### Fixed
