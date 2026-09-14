@@ -4,6 +4,7 @@ title Video Downloader Local
 
 set "ROOT_DIR=%~dp0"
 for %%I in ("%ROOT_DIR%..") do set "ROOT_DIR=%%~fI\"
+cd /d "%ROOT_DIR%"
 set "VENV_DIR=%ROOT_DIR%venv"
 set "PY=%VENV_DIR%\Scripts\python.exe"
 

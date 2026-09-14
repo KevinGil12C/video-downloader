@@ -1,0 +1,15 @@
+{
+  "_comment": [
+    "Video Downloader Local - example configuration.",
+    "Everything here is optional: the application runs with safe local",
+    "defaults without any configuration file. These keys document the",
+    "environment variables understood by the backend (see app/backend/config.py).",
+    "To use them, set them as Windows environment variables or in a .env file."
+  ],
+  "VD_HOST": "127.0.0.1",
+  "VD_PORT": 8000,
+  "VD_DEBUG": false,
+  "VD_DOWNLOADS_DIR": "downloads",
+  "VD_LOGS_DIR": "logs",
+  "VD_ALLOWED_ORIGINS": ""
+}

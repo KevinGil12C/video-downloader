@@ -32,6 +32,20 @@ pip install -r requirements-dev.txt
   python -m uvicorn app.backend.server:app --host 127.0.0.1 --port 8000
   ```
 
+## Configuración
+
+Toda la configuración es opcional y se lee desde variables de entorno (ver
+`config.example.json` y `app/backend/config.py`):
+
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `VD_HOST` | Dirección a la que se bindea la API | `127.0.0.1` |
+| `VD_PORT` | Puerto de la API | `8000` |
+| `VD_DEBUG` | Modo debug (`1/true/yes/on`) | `false` |
+| `VD_DOWNLOADS_DIR` | Carpeta de descargas | `downloads/` |
+| `VD_LOGS_DIR` | Carpeta de logs | `logs/` |
+| `VD_ALLOWED_ORIGINS` | Orígenes CORS extra (separados por coma) | vacío |
+
 ## Tests
 
 ```bat

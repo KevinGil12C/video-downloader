@@ -1,0 +1,45 @@
+"""FastAPI application factory used by the desktop UI and the browser extension.
+
+Run it with::
+
+    python -m uvicorn app.backend.server:app --host 127.0.0.1 --port 8000
+"""
+from __future__ import annotations
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.backend.api import health, info
+from app.backend.config import APP_VERSION, get_settings
+from app.backend.security import allowed_cors_origins
+
+
+def create_app() -> FastAPI:
+    """Build and configure the FastAPI application."""
+    settings = get_settings()
+    settings.ensure_dirs()
+
+    application = FastAPI(
+        title="Video Downloader Local API",
+        description="Local video downloader backend for the desktop UI "
+        "and the browser extension.",
+        version=APP_VERSION,
+        docs_url="/docs",
+        redoc_url=None,
+    )
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_cors_origins(),
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    application.include_router(health.router)
+    application.include_router(info.router)
+
+    return application
+
+
+app = create_app()

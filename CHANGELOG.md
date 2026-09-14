@@ -10,6 +10,8 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 
 - Esqueleto del proyecto Open Source: licencia MIT, documentación, CI, plantillas de issues/PR y dependabot.
 - Scripts de instalación y mantenimiento para Windows en `scripts/` (install, start, test, update, uninstall).
+- Backend FastAPI local: `app/` con configuración por entorno, seguridad (CORS local + validación de URLs), modelos Pydantic y endpoints `GET /api/health` y `GET /api/info`.
+- `config.example.json` con las variables de entorno documentadas.
 
 ### Changed
 ### Fixed
