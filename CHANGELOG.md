@@ -24,6 +24,9 @@ Todas las notables modificaciones de este proyecto se documentan en este archivo
 - Endpoint WebSocket `WS /ws/progress` (`app/backend/api/ws.py`): envía el estado actual al conectar y stream de actualizaciones (`download_id`, `status`, `progress`, `speed`, `eta`).
 - El manager ahora captura y emite `speed`/`eta` formateados y admite un listener de actualizaciones (`set_update_listener`).
 - Tests del hub de progreso y del stream WebSocket completo con fakes (`tests/test_progress.py`, `tests/test_progress_ws.py`).
+- Shell de escritorio Eel (`app/desktop/main.py`): arranca el backend FastAPI en segundo plano (`UvicornThread`), inicializa `web/` y abre la ventana con Edge/Chrome; expone `get_app_info` y permite modo headless (`VD_BROWSER=false`).
+- UI provisional de escritorio (`web/index.html`) con comprobación de estado del backend, que se reemplazará en la fase de frontend.
+- Tests del shell: arranque/parada de uvicorn, info expuesta al UI y boot completo con `eel.start` simulado (`tests/test_desktop.py`).
 
 ### Changed
 ### Fixed
