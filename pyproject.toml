@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "video-downloader"
+version = "0.1.0"
+description = "Open source local video downloader for Windows with a Python backend, Eel desktop UI, FastAPI localhost API and a browser extension."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["video", "downloader", "yt-dlp", "ffmpeg", "fastapi", "eel", "open-source"]
+dependencies = [
+    "fastapi>=0.115.0,<1.0.0",
+    "uvicorn[standard]>=0.30.0,<1.0.0",
+    "eel>=0.16.0,<1.0.0",
+    "pydantic>=2.9.0,<3.0.0",
+    "yt-dlp>=2024.12.13",
+]
+
+[[project.authors]]
+name = "Kevin Jesús Coyote Gil"
+email = "developer@kevscl.com"
+
+[project.urls]
+Homepage = "https://kevscl.com"
+Repository = "https://github.com/KevinGil12C/video-downloader"
+Issues = "https://github.com/KevinGil12C/video-downloader/issues"
+Documentation = "https://github.com/KevinGil12C/video-downloader/tree/main/docs"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["tests*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+python_files = "test_*.py"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+mypy_path = "app"
+warn_unused_configs = true

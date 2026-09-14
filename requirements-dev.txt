@@ -1,0 +1,16 @@
+# --- Development dependencies ---
+# Installed on top of the runtime requirements.
+-r requirements.txt
+
+# pytest: test runner and assertion helpers.
+pytest>=8.3.0,<9.0.0
+# pytest-cov: test coverage reports.
+pytest-cov>=5.0.0,<7.0.0
+# httpx: HTTP client used by FastAPI TestClient (ASGITransport).
+httpx>=0.27.0,<1.0.0
+# ruff: fast Python linter and formatter (lint + fix + format).
+ruff>=0.7.0,<1.0.0
+# mypy: optional static type checking.
+mypy>=1.11.0,<2.0.0
+# types-requests: type stubs for requests (used by some Eel internals/tests).
+types-requests>=2.32.0

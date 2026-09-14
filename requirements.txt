@@ -1,0 +1,14 @@
+# --- Runtime dependencies ---
+# FastAPI: localhost HTTP API used by the browser extension and the desktop UI.
+fastapi>=0.115.0,<1.0.0
+# Uvicorn: ASGI server that serves the FastAPI application on localhost.
+uvicorn[standard]>=0.30.0,<1.0.0
+# Eel: Python library that powers the desktop window (Chromium + local web UI).
+eel>=0.16.0,<1.0.0
+# Pydantic: validation and models for API requests/responses.
+pydantic>=2.9.0,<3.0.0
+# yt-dlp: extraction engine used to resolve and download media.
+yt-dlp>=2024.12.13
+
+# FFmpeg is NOT a pip dependency.
+# It is an external binary used to merge/convert media. See docs/installation.

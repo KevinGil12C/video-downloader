@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/KevinGil12C/video-downloader/discussions
+    about: Preguntas generales, ideas y discusiones sobre el proyecto.
+  - name: Seguridad
+    url: https://github.com/KevinGil12C/video-downloader/blob/main/SECURITY.md
+    about: Reportar vulnerabilidades de forma privada (no publiques vulnerabilidades como issues).
